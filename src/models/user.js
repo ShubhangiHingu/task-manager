@@ -8,7 +8,12 @@ const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        validate(value) {
+            if (!validator.isName(value)) {
+                throw new Error('Name is invalid')
+            }
+        }
     },
     email: {
         type: String,
@@ -22,6 +27,7 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
+
     password: {
         type: String,
         required: true,
@@ -65,9 +71,9 @@ userSchema.methods.toJSON = function () {
     const user = this
     const userObject = user.toObject()
 
-    delete userObject.password
-    delete userObject.tokens
-    delete userObject.avatar
+    // delete userObject.password
+    // delete userObject.tokens
+    // delete userObject.avatar
 
     return userObject
 }
