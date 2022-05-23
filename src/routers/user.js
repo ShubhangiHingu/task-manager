@@ -4,8 +4,9 @@ const auth = require('../middleware/auth');
 
 const router = new express.Router();
 
+// router.get("/users", UserController.validate('createUser'),UserController.createUser);
 
-router.post("/users", UserController.users_signup);
+router.get("/users", UserController.createUser);
 router.get("/users/me", UserController.users_auth);
 router.post("/users/login", UserController.users_login);
 router.post("/users/logout",auth, UserController.users_logout);

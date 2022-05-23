@@ -1,11 +1,14 @@
-
 const mongoose = require("mongoose");
 const multer = require('multer')
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require('../middleware/auth')
 const User = require('../models/user')
+const { validationResult } = require('express-validator/check');
+const { body } = require('express-validator/check')
 
+
+require('../validators/userValidator');
 
 
 // Handle incoming POST requests to /users
@@ -13,7 +16,7 @@ const User = require('../models/user')
 
 //create new user
 
-exports.users_signup = (async (req, res) => {
+exports.createUser = (async (req, res) => {
     const user = new User(req.body)
 
     try {

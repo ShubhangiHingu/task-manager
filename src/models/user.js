@@ -4,16 +4,18 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Task = require('./task')
 
+require('../validators/userValidator');
+
+
+
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
         trim: true,
-        validate(value) {
-            if (!validator.isName(value)) {
-                throw new Error('Name is invalid')
-            }
-        }
+        minLength: [4, 'Name is too short!'],
+        maxLength: 15                                                                
+        
     },
     email: {
         type: String,
