@@ -5,7 +5,7 @@ const taskRouter = require('./routes/task');
 const app = express();
 
 //database connection
-require('./config/db')
+require('../config/db')
 
 //middleware
 
