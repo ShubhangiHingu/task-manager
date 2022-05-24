@@ -4,9 +4,6 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Task = require('./task')
 
-require('../validators/userValidator');
-
-
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -14,8 +11,8 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true,
         minLength: [4, 'Name is too short!'],
-        maxLength: 15                                                                
-        
+        maxLength: 15
+
     },
     email: {
         type: String,
@@ -124,6 +121,8 @@ userSchema.pre('remove', async function (next) {
     next()
 })
 
-const User = mongoose.model('User', userSchema)
+// const User = mongoose.model('User', userSchema)
 
-module.exports = User
+// module.exports = User
+
+module.exports = mongoose.model('User', userSchema)

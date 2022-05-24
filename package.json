@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "dev": "env-cmd ./config/dev.env nodemon src/index.js",
-    "start": "nodemon src/index.js"
+    "dev": "env-cmd tests/config/dev.env nodemon index.js",
+    "start": "nodemon index.js"
   },
   "jest": {
     "testEnvironment": "node"
@@ -15,9 +15,11 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.16.4",
-    "express-validator": "^5.3.0",
+    "express-validator": "^5.3.1",
     "jsonwebtoken": "^8.4.0",
     "mongodb": "^4.5.0",
     "mongoose": "^5.3.16",

@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 
 //create new task
 
-exports.task_new = (auth, async (req, res) => {
+const createTask = (auth, async (req, res) => {
     const task = new Task({
         ...req.body,
         owner: req.user._id
@@ -27,7 +27,7 @@ exports.task_new = (auth, async (req, res) => {
 
 //match and sorting task
 
-exports.task_match = (auth, async (req, res) => {
+const matchTask = (auth, async (req, res) => {
     const match = {}
     const sort = {}
 
@@ -59,7 +59,7 @@ exports.task_match = (auth, async (req, res) => {
 
 // get tasks
 
-exports.task_get = (auth, async (req, res) => {
+const getAllTasks = (auth, async (req, res) => {
     try {
         await req.user.populate('tasks').execPopulate()
         res.send(req.user.tasks)
@@ -70,7 +70,7 @@ exports.task_get = (auth, async (req, res) => {
 
 //find task by id
 
-exports.task_id = (auth, async (req, res) => {
+const getTaskId = (auth, async (req, res) => {
     const _id = req.params.id
 
     try {
@@ -88,7 +88,7 @@ exports.task_id = (auth, async (req, res) => {
 
 //update task
 
-exports.task_update = (auth, async (req, res) => {
+const updateTask = (auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['description', 'completed']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -115,7 +115,7 @@ exports.task_update = (auth, async (req, res) => {
 
 //delete task
 
-exports.task_delete = (auth, async (req, res) => {
+const  deleteTask = (auth, async (req, res) => {
     try {
         const task = await Task.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
 
@@ -128,3 +128,12 @@ exports.task_delete = (auth, async (req, res) => {
         res.status(500).send()
     }
 })
+
+module.exports = {
+    createTask,
+    matchTask,
+    getAllTasks,
+    updateTask,
+    deleteTask,
+    getTaskId,
+  }

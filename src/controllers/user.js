@@ -4,11 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require('../middleware/auth')
 const User = require('../models/user')
-const { validationResult } = require('express-validator/check');
-const { body } = require('express-validator/check')
 
-
-require('../validators/userValidator');
 
 
 // Handle incoming POST requests to /users
@@ -16,22 +12,30 @@ require('../validators/userValidator');
 
 //create new user
 
-exports.createUser = (async (req, res) => {
-    const user = new User(req.body)
+const createUser = async (req, res) => {
+    const { name, email, password } = req.body;
 
+    const user = await User({
+        name,
+        email,
+        password,
+    });
     try {
-        await user.save()
+        await user.save();
         const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
     } catch (e) {
         res.status(400).send(e)
+        return;
     }
-})
 
+    res.json({ success: true, user });
+};
 
 //login user
 
-exports.users_login = (async (req, res) => {
+
+const loginUser = (async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password)
         const token = await user.generateAuthToken()
@@ -39,12 +43,13 @@ exports.users_login = (async (req, res) => {
     } catch (e) {
         res.status(400).send()
     }
+
 })
 
 
 //logout user
 
-exports.users_logout = (auth, async (req, res) => {
+const logoutUser = (auth, async (req, res) => {
     try {
         req.user.tokens = req.user.tokens.filter((token) => {
             return token.token !== req.token
@@ -60,7 +65,7 @@ exports.users_logout = (auth, async (req, res) => {
 
 //logAllout user
 
-exports.users_logoutAll = (auth, async (req, res) => {
+const logoutAllUser = (auth, async (req, res) => {
     try {
         req.user.tokens = []
         await req.user.save()
@@ -72,14 +77,13 @@ exports.users_logoutAll = (auth, async (req, res) => {
 
 //get user
 
-exports.users_auth = (auth, async (req, res) => {
+const authUser = (auth, async (req, res) => {
     res.send(req.user)
 })
 
 
 //update user
-
-exports.users_update = (auth, async (req, res) => {
+const updateUser = (auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'email', 'password', 'age']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -99,7 +103,7 @@ exports.users_update = (auth, async (req, res) => {
 
 //delete user
 
-exports.users_delete = ('/users/me', auth, async (req, res) => {
+const deleteUser = ('/users/me', auth, async (req, res) => {
     try {
         await req.user.remove()
         sendCancelationEmail(req.user.email, req.user.name)
@@ -128,7 +132,7 @@ const upload = multer({
 
 //upload avatar
 
-exports.users_avatar_upload = (auth, upload.single('avatar'), async (req, res) => {
+const avatarUser = (auth, upload.single('avatar'), async (req, res) => {
     const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
     req.user.avatar = buffer
     await req.user.save()
@@ -140,7 +144,7 @@ exports.users_avatar_upload = (auth, upload.single('avatar'), async (req, res) =
 
 //delete avatar
 
-exports.users_avatar_delete = (auth, async (req, res) => {
+const deleteAvatar = (auth, async (req, res) => {
     req.user.avatar = undefined
     await req.user.save()
     res.send()
@@ -149,7 +153,7 @@ exports.users_avatar_delete = (auth, async (req, res) => {
 
 //get avatar id
 
-exports.users_avatar_id = ('/users/:id/avatar', async (req, res) => {
+const getAvatarId = ('/users/:id/avatar', async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
 
@@ -165,4 +169,15 @@ exports.users_avatar_id = ('/users/:id/avatar', async (req, res) => {
 })
 
 
-
+module.exports = {
+    createUser,
+    authUser,
+    loginUser,
+    logoutUser,
+    logoutAllUser,
+    updateUser,
+    avatarUser,
+    deleteAvatar,
+    getAvatarId,
+    deleteUser,
+}

@@ -1,17 +1,20 @@
 const express = require('express');
-const userRouter = require('./routers/user');
-const taskRouter = require('./routers/task');
-const expressValidator = require('express-validator')
+const userRouter = require('./routes/user');
+const taskRouter = require('./routes/task');
 
 const app = express();
-
 
 //database connection
 require('./config/db')
 
+//middleware
+
 app.use(express.json());
+
+//routes
 app.use(userRouter);
 app.use(taskRouter);
-app.use(expressValidator());
+
+
 
 module.exports = app;
