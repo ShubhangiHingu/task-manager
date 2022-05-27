@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const Task = require("../models/task");
 const auth = require('../middleware/auth');
+const Task = require("../models/task");
 
 //create new task
 
@@ -15,10 +15,13 @@ const createTask = (auth, async (req, res) => {
     try {
         await task.save()
         res.status(201).send(task)
+
     } catch (e) {
-        res.status(400).send(e)
+        res.status(400).send(e) 
     }
+
 })
+
 
 // GET /tasks?completed=true
 // GET /tasks?limit=10&skip=20
@@ -115,7 +118,7 @@ const updateTask = (auth, async (req, res) => {
 
 //delete task
 
-const  deleteTask = (auth, async (req, res) => {
+const deleteTask = (auth, async (req, res) => {
     try {
         const task = await Task.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
 
@@ -129,6 +132,9 @@ const  deleteTask = (auth, async (req, res) => {
     }
 })
 
+
+
+
 module.exports = {
     createTask,
     matchTask,
@@ -136,4 +142,4 @@ module.exports = {
     updateTask,
     deleteTask,
     getTaskId,
-  }
+}

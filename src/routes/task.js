@@ -1,5 +1,7 @@
 const express = require('express');
 const router =  express.Router();
+const auth = require('../middleware/auth');
+const Task = require('../controllers/task')
 
 
 // Handle incoming POST requests to /tasks
@@ -13,7 +15,11 @@ const {
   getTaskId,
 } = require('../controllers/task')
 
-router.route('/tasks').post(createTask).get(matchTask).get(getAllTasks)
-router.route('tasks/:id').get(getTaskId).put(updateTask).delete(deleteTask)
+
+
+router.post('/', createTask);
+
+router.route('/').get(matchTask).get(getAllTasks)
+router.route('/:id').get(getTaskId).put(updateTask).delete(deleteTask)
 
 module.exports = router;

@@ -1,4 +1,5 @@
 /* all the jsonwebtoken or passport auth code will go here */
+
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 

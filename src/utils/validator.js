@@ -1,3 +1,4 @@
+//check validation
 
 const { check, validationResult } = require('express-validator/check');
 
@@ -27,9 +28,12 @@ exports.validateUserSignUp = [
     })
 ];
 
+//exports errors
+
 exports.userValidation = (req, res, next) => {
   const result = validationResult(req).array();
   if (!result.length) return next();
-  const error = result[0].msg;
+  const error = result.msg;
   res.json({ success: false, message: error });
 }
+

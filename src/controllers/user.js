@@ -2,13 +2,11 @@ const mongoose = require("mongoose");
 const multer = require('multer')
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const auth = require('../middleware/auth')
+const auth = require('../middleware/auth');
 const User = require('../models/user')
-
-
+const upload = require("../middleware/upload");
 
 // Handle incoming POST requests to /users
-
 
 //create new user
 
@@ -33,7 +31,6 @@ const createUser = async (req, res) => {
 };
 
 //login user
-
 
 const loginUser = (async (req, res) => {
     try {
@@ -83,6 +80,7 @@ const authUser = (auth, async (req, res) => {
 
 
 //update user
+
 const updateUser = (auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'email', 'password', 'age']
@@ -116,30 +114,20 @@ const deleteUser = ('/users/me', auth, async (req, res) => {
 
 //upload  files img/doc/word
 
-const upload = multer({
-    limits: {
-        fileSize: 1000000
-    },
-    fileFilter(req, file, cb) {
-        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-            return cb(new Error('Please upload an image'))
-        }
-
-        cb(undefined, true)
-    }
-})
-
-
 //upload avatar
 
-const avatarUser = (auth, upload.single('avatar'), async (req, res) => {
-    const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
-    req.user.avatar = buffer
-    await req.user.save()
-    res.send()
-}, (error, req, res, next) => {
-    res.status(400).send({ error: error.message })
-})
+
+
+const avatarUser = (auth, upload.array('avatar'), (req, res) => {
+    console.log(req.files); // UPLOADED FILE DESCRIPTION RECEIVED
+    res.send({
+        status: "success",
+        message: "Files uploaded successfully",
+        data: req.files,
+    })
+});
+
+
 
 
 //delete avatar
