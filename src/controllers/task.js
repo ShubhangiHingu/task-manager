@@ -4,17 +4,20 @@ const jwt = require("jsonwebtoken");
 const auth = require('../middleware/auth');
 const Task = require("../models/task");
 
+
 //create new task
 
 const createTask = (auth, async (req, res) => {
+    
     const task = new Task({
+
         ...req.body,
-        owner: req.user._id
+        owner: req.user._id,
     })
 
     try {
         await task.save()
-        res.status(201).send(task)
+        res.status(201).send("Task saved: " + task);
 
     } catch (e) {
         res.status(400).send(e) 

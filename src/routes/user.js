@@ -20,7 +20,8 @@ const {
 
 
 router.post('/', validateUserSignUp, userValidation, createUser);
-router.route('/login').get(loginUser)
+router.get('/login',loginUser);
+// router.route('/login').get(loginUser)
 router.route('/logout').post(logoutUser)
 router.route('/logoutAll').post(logoutAllUser)
 router.route('/:id/avatar').delete(getAvatarId)
