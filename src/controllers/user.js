@@ -2,51 +2,73 @@ const mongoose = require("mongoose");
 const multer = require('multer')
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const auth = require('../middleware/auth');
 const User = require('../models/user')
 const upload = require("../middleware/upload");
+const JWT_SECRET = 'thisismynewcourse';
+
+
 
 // Handle incoming POST requests to /users
 
 //create new user
 
-const createUser = async (req, res) => {
-    const { name, email, password } = req.body;
 
-    const user = await User({
-        name,
-        email,
-        password,
-    });
+
+const createUser = (async (req, res) => {
+    const { name, email, password: plainTextPassword } = req.body
+
+    const password = await bcrypt.hash(plainTextPassword, 10)
+
+
     try {
-        await user.save();
-        const token = await user.generateAuthToken()
-        res.status(201).send({ user, token })
-    } catch (e) {
-        res.status(400).send(e)
-        return;
+        const user = await User.create({
+            name,
+            email,
+            password
+        })
+        // const token = await user.generateAuthToken()
+
+        console.log('User created successfully: ', user)
+    } catch (error) {
+        if (error.code === 11000) {
+            // duplicate key
+            return res.json({ status: 'error', error: 'name already in use' })
+        }
+        throw error
     }
 
-    res.json({ success: true, user });
-};
+    res.json({ status: 'ok', data: { name, email, password } })
+})
 
 //login user
 
 const loginUser = (async (req, res) => {
-    try {
-        const user = await User.findByCredentials(req.body.email, req.body.password)
-        const token = await user.generateAuthToken()
-        res.send({ user, token })
-    } catch (e) {
-        res.status(400).send()
+    const { email, password } = req.body
+    const user = await User.findOne({ email })
+
+    if (!user) {
+        return res.json({ status: 'error', error: 'Invalid email/password' })
     }
 
+    if (await bcrypt.compare(password, user.password)) {
+
+        const token = jwt.sign(
+            {
+                _id: user._id.toString()
+            },
+            JWT_SECRET
+        )
+
+        return res.json({ status: 'ok', data: { email, password, token } })
+    }
+
+    return res.json({ status: 'error', error: 'Invalid email/password' })
 })
 
 
 //logout user
 
-const logoutUser = (auth, async (req, res) => {
+const logoutUser = (async (req, res) => {
     try {
         req.user.tokens = req.user.tokens.filter((token) => {
             return token.token !== req.token
@@ -62,7 +84,7 @@ const logoutUser = (auth, async (req, res) => {
 
 //logAllout user
 
-const logoutAllUser = (auth, async (req, res) => {
+const logoutAllUser = (async (req, res) => {
     try {
         req.user.tokens = []
         await req.user.save()
@@ -74,14 +96,14 @@ const logoutAllUser = (auth, async (req, res) => {
 
 //get user
 
-const authUser = (auth, async (req, res) => {
+const getUser = (async (req, res) => {
     res.send(req.user)
 })
 
 
 //update user
 
-const updateUser = (auth, async (req, res) => {
+const updateUser = (async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'email', 'password', 'age']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -101,7 +123,7 @@ const updateUser = (auth, async (req, res) => {
 
 //delete user
 
-const deleteUser = ('/users/me', auth, async (req, res) => {
+const deleteUser = (async (req, res) => {
     try {
         await req.user.remove()
         sendCancelationEmail(req.user.email, req.user.name)
@@ -118,7 +140,7 @@ const deleteUser = ('/users/me', auth, async (req, res) => {
 
 
 
-const avatarUser = (auth, upload.array('avatar'), (req, res) => {
+const avatarUser = (upload.array('avatar'), (req, res) => {
     console.log(req.files); // UPLOADED FILE DESCRIPTION RECEIVED
     res.send({
         status: "success",
@@ -132,7 +154,7 @@ const avatarUser = (auth, upload.array('avatar'), (req, res) => {
 
 //delete avatar
 
-const deleteAvatar = (auth, async (req, res) => {
+const deleteAvatar = (async (req, res) => {
     req.user.avatar = undefined
     await req.user.save()
     res.send()
@@ -141,7 +163,7 @@ const deleteAvatar = (auth, async (req, res) => {
 
 //get avatar id
 
-const getAvatarId = ('/users/:id/avatar', async (req, res) => {
+const getAvatarId = (async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
 
@@ -159,7 +181,7 @@ const getAvatarId = ('/users/:id/avatar', async (req, res) => {
 
 module.exports = {
     createUser,
-    authUser,
+    getUser,
     loginUser,
     logoutUser,
     logoutAllUser,

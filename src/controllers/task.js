@@ -7,8 +7,8 @@ const Task = require("../models/task");
 
 //create new task
 
-const createTask = (auth, async (req, res) => {
-    
+const createTask = (async (req, res) => {
+
     const task = new Task({
 
         ...req.body,
@@ -20,7 +20,7 @@ const createTask = (auth, async (req, res) => {
         res.status(201).send("Task saved: " + task);
 
     } catch (e) {
-        res.status(400).send(e) 
+        res.status(400).send(e)
     }
 
 })
@@ -33,7 +33,7 @@ const createTask = (auth, async (req, res) => {
 
 //match and sorting task
 
-const matchTask = (auth, async (req, res) => {
+const matchTask = (async (req, res) => {
     const match = {}
     const sort = {}
 
@@ -65,7 +65,7 @@ const matchTask = (auth, async (req, res) => {
 
 // get tasks
 
-const getAllTasks = (auth, async (req, res) => {
+const getAllTasks = (async (req, res) => {
     try {
         await req.user.populate('tasks').execPopulate()
         res.send(req.user.tasks)
@@ -94,7 +94,7 @@ const getTaskId = (auth, async (req, res) => {
 
 //update task
 
-const updateTask = (auth, async (req, res) => {
+const updateTask = (async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['description', 'completed']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -121,20 +121,23 @@ const updateTask = (auth, async (req, res) => {
 
 //delete task
 
-const deleteTask = (auth, async (req, res) => {
+
+const deleteTask = ( async (req, res) => {
     try {
-        const task = await Task.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
 
-        if (!task) {
-            res.status(404).send()
+        const deletedTask = await Task.findOneAndDelete({
+            _id: req.params.id,
+            owner: req.user._id,
+        });
+        if (!deletedTask) {
+            res.status(404).send("404 Task Not found");
         }
-
-        res.send(task)
-    } catch (e) {
-        res.status(500).send()
+        res.status(200).send(deletedTask);
+    } catch (error) {
+        res.status(400).send();
+        console.log("Error-->", error);
     }
-})
-
+});
 
 
 

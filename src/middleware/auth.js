@@ -1,27 +1,29 @@
 /* all the jsonwebtoken or passport auth code will go here */
 
-const jwt = require('jsonwebtoken')
-const User = require('../models/user')
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+// for create token
 
-
-//for create token
 const auth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization').replace('Bearer ', '')
-
+    const token = req.header('Authorization').replace('Bearer ', '');
     //for check-token
-    const decoded = jwt.verify(token, 'process.env.JWT_SECRET')
-    const user = await User.findOne({ _id: decoded._id, 'tokens.token': token })
 
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findOne({
+      _id: decoded._id,
+      'tokens.token': token
+    });
     if (!user) {
-      throw new Error()
+      throw new Error();
     }
-    req.token = token
-    req.user = user
-    next()
-
+    req.token = token;
+    req.user = user;
+    next();
   } catch (e) {
-    res.status(401).send({ error: 'Please  authanticate..' })
+    res.status(401).send({ error: 'Please authenticate!' });
   }
-}
-module.exports = auth
+};
+
+module.exports = auth;
+
