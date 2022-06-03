@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const Task = require("../models/task");
+const Task = require("../models/task.models");
 
 
-//create new task
+// POST REQUEST ---> Creating Task
 
 const createTask = (async (req, res) => {
 
@@ -19,7 +19,8 @@ const createTask = (async (req, res) => {
         return res.status(201).json({ message: "Task saved: ", task })
 
     } catch (error) {
-        return res.status(500).json({ status: false });
+        res.status(400).json({ message: error.message })
+
     }
 
 })
@@ -32,7 +33,7 @@ const createTask = (async (req, res) => {
 
 //match and sorting task
 
-const matchTask = (async (req, res) => {
+const searchTask = (async (req, res) => {
     const match = {}
     const sort = {}
 
@@ -57,23 +58,25 @@ const matchTask = (async (req, res) => {
         }).execPopulate()
         return res.send(req.user.tasks)
     } catch (error) {
-       return res.status(500).json({success:false});
+        res.status(400).json({ message: error.message })
+
     }
 })
 
 
-// get tasks
+// GET REQUEST ---> READING Tasks
 
 const getAllTasks = (async (req, res) => {
     try {
         await req.user.populate('tasks').execPopulate()
         res.send(req.user.tasks)
     } catch (error) {
-        return res.status(500).json({success:false});
+        res.status(400).json({ message: error.message })
+
     }
 })
 
-//find task by id
+// GET REQUEST ---> READING TaskById
 
 const getTaskId = (async (req, res) => {
     const _id = req.params.id
@@ -87,11 +90,12 @@ const getTaskId = (async (req, res) => {
 
         res.send(task)
     } catch (error) {
-       return res.status(500).json({success:false});
+        res.status(400).json({ message: error.message })
+
     }
 })
 
-//update task
+// PUT REQUEST ---> UPDATING Task Data
 
 const updateTask = (async (req, res) => {
     const updates = Object.keys(req.body)
@@ -113,13 +117,14 @@ const updateTask = (async (req, res) => {
         await task.save()
         res.send(task)
     } catch (error) {
-       return res.status(500).json({success:false});
-       
+        res.status(400).json({ message: error.message })
+
+
     }
 })
 
 
-//delete task
+// DELETE REQUEST ---> DELETING Task
 
 
 const deleteTask = (async (req, res) => {
@@ -134,8 +139,9 @@ const deleteTask = (async (req, res) => {
         }
         res.status(200).send(deletedTask);
     } catch (error) {
-       return res.status(500).json({success:false,error})
-        // console.log("Error-->", error);
+        res.status(400).json({ message: error.message })
+
+
     }
 });
 
@@ -143,7 +149,7 @@ const deleteTask = (async (req, res) => {
 
 module.exports = {
     createTask,
-    matchTask,
+    searchTask,
     getAllTasks,
     updateTask,
     deleteTask,

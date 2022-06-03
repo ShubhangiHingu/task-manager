@@ -1,7 +1,7 @@
 const request = require('supertest');
 const app = require('../src/app');
-const Task = require('../src/models/task');
-const User = require('../src/models/user');
+const Task = require('../src/models/task.models');
+const User = require('../src/models/user.model');
 
 
 const {
@@ -21,7 +21,7 @@ test('Should create task for user', async () => {
         .post('/tasks')
         .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
         .send({
-            description: 'From my new test'
+            description: 'Create new test'
         })
         .expect(201);
     const task = await Task.findById(response.body._id);

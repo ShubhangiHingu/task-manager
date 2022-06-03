@@ -2,18 +2,18 @@ const mongoose = require("mongoose");
 const multer = require('multer')
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require('../models/user')
-const upload = require("../middleware/upload");
+const User = require('../models/user.models')
+const upload = require("../middleware/upload.middleware");
 
 
 
 // Handle incoming POST requests to /users
 
-//create new user
 
 
+ // POST REQUEST ---> Creating User
 
-const createUser = (async (req, res) => {
+const createUser = (async (req, res) => {                                       
     const { name, email, password: plainTextPassword } = req.body
 
     const password = await bcrypt.hash(plainTextPassword, 10)
@@ -25,10 +25,10 @@ const createUser = (async (req, res) => {
             email,
             password
         })
-        // const token = await user.generateAuthToken()
 
-        console.log('User created successfully: ', user)
-    
+        res.json({ status: 'ok', data: { user } })
+
+
     } catch (error) {
         if (error.code === 500) {
 
@@ -36,13 +36,11 @@ const createUser = (async (req, res) => {
         }
         throw error
     }
-
-    res.json({ status: 'ok', data: { name, email, password } })
 })
 
-//login user
+ // POST REQUEST ---> Login User
 
-const loginUser = (async (req, res) => {
+const loginUser = (async (req, res) => {                        
     const { email, password } = req.body
     const user = await User.findOne({ email })
 
@@ -56,7 +54,7 @@ const loginUser = (async (req, res) => {
             {
                 _id: user._id.toString()
             },
-            'thisismynewcourse'
+            process.env.JWT_SECRET
         )
 
         return res.json({ status: 'ok', data: { email, password, token } })
@@ -66,7 +64,7 @@ const loginUser = (async (req, res) => {
 })
 
 
-//logout user
+// POST REQUEST ---> LoggingOut User
 
 const logoutUser = (async (req, res) => {
     try {
@@ -75,70 +73,78 @@ const logoutUser = (async (req, res) => {
         })
         await req.user.save()
 
-        return res.json({status:'success'})
+        return res.json({ status: 'success' })
     } catch (e) {
-        return res.status(500).json({success:false});
+        res.status(400).json({ message: error.message })
+
 
     }
 })
 
 
-//logAllout user
+
+// POST REQUEST ---> LoggingOut User from all
 
 const logoutAllUser = (async (req, res) => {
     try {
         req.user.tokens = []
         await req.user.save()
-        return res.json({status:'success'})
+        return res.json({ status: 'success' })
     } catch (e) {
-        return res.status(500).json({success:false});
+        res.status(400).json({ message: error.message })
+
 
     }
 })
 
-//get user
+// GET REQUEST ---> READING Users
 
-const getUser = (async (req, res) => {
-    res.send(req.user)
+const getAllUser = (async (req, res) => {
+    try {
+        const data = await User.find();
+        res.json(data)
+    }
+    catch (error) {
+        res.status(400).json({ message: error.message })
+
+    }
 })
 
-
-//update user
+// PUT REQUEST ---> UPDATING User's Data
 
 const updateUser = (async (req, res) => {
-    const updates = Object.keys(req.body)
-    const allowedUpdates = ['name', 'email', 'password', 'age']
-    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
-
-    if (!isValidOperation) {
-        return res.status(400).send({ error: 'Invalid updates!' })
-    }
-
     try {
-        updates.forEach((update) => req.user[update] = req.body[update])
-        await req.user.save();
-        res.send(req.user);
-    } catch (e) {
-        return res.status(500).json({success:false});
+        const id = req.params.id;
+        const updatedData = req.body;
+
+        const user = await User.findByIdAndUpdate(
+            id, updatedData
+        )
+
+        res.send(user)
+    }
+    catch (error) {
+        res.status(400).json({ message: error.message })
     }
 })
 
-//delete user
+// DELETE REQUEST ---> DELETING User
+
 
 const deleteUser = (async (req, res) => {
     try {
-        await req.user.remove()
-        sendCancelationEmail(req.user.email, req.user.name)
-        res.send(req.user)
-    } catch (e) {
-       return res.status(500).json({success:false});
+        const id = req.params.id;
+        const user = await User.findByIdAndDelete(id)
+        res.send(`User has been deleted..`,user)
+    }
+    catch (error) {
+        res.status(400).json({ message: error.message })
     }
 })
 
-
 //upload  files img/doc/word
 
-//upload avatar
+// UPLOAD REQUEST ---> UPLOAD DATA FROM DATA
 
 
 
@@ -153,17 +159,16 @@ const avatarUser = (upload.array('avatar'), (req, res) => {
 
 
 
-
-//delete avatar
+// DELETE REQUEST ---> DELETING PROFILE BUFFER DATA
 
 const deleteAvatar = (async (req, res) => {
     req.user.avatar = undefined
     await req.user.save()
-        return res.json({status:'success'})
+    return res.json({ status: 'success' })
 })
 
 
-//get avatar id
+// GET REQUEST ---> GETTING PROFILE AVATAR
 
 const getAvatarId = (async (req, res) => {
     try {
@@ -176,15 +181,16 @@ const getAvatarId = (async (req, res) => {
         res.set('Content-Type', 'image/png')
         res.send(user.avatar)
     } catch (e) {
-       return res.status(500).json({success:false});
-       
+        res.status(400).json({ message: error.message })
+
+
     }
 })
 
 
 module.exports = {
     createUser,
-    getUser,
+    getAllUser,
     loginUser,
     logoutUser,
     logoutAllUser,

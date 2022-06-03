@@ -1,5 +1,5 @@
 // const path = require('path');
-const multer = require('multer');
+const multer = require('multer');                     // Multer is used for handeling File Uploads
 
 const fileStorageEngine = multer.diskStorage({
   destination: (req, file, cb) => {

@@ -2,11 +2,11 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const Task = require('./task')
-const validator = require('validator')
+const Task = require('./task.models')
+const validator = require('validator')                  // Library for Validation
 
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({                // Defining User Schema
     name: {
         type: String,
         required: true,
@@ -44,12 +44,7 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
-    tokens: [{
-        token: {
-            type: String,
-            required: true
-        }
-    }],
+
     avatar: {
         type: Buffer
     }
@@ -59,17 +54,11 @@ const userSchema = new mongoose.Schema({
 
 
 userSchema.virtual('tasks', {
-    ref: 'Task',
-    localField: '_id',
-    foreignField: 'owner'
-  })
-  
-  userSchema.methods.toJSON = () => {
-    const user = this
-    const userObject = user.toObject()
-    return userObject
-  }
-  
+    ref: 'Task',                                        // Model to be Referenced
+    localField: '_id',                                  // Which local data is stored
+    foreignField: 'owner'                                // Name of the field on which the data is stored
+})
 
 
-module.exports = mongoose.model('User', userSchema);
+
+module.exports = mongoose.model('User', userSchema);      // Creating Model

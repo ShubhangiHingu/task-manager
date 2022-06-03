@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const auth = require('../middleware/auth.middleware');
 const { validateTask } = require('../utils/validator');
 
 
@@ -8,18 +8,18 @@ const { validateTask } = require('../utils/validator');
 
 const {
   createTask,
-  matchTask,
+  searchTask,
   getAllTasks,
   updateTask,
   deleteTask,
   getTaskId,
-} = require('../controllers/task')
+} = require('../controllers/task.controller')
 
-// router.use(auth);
+
 
 
 router.post('/',auth, validateTask, createTask);
-router.get('/', auth, matchTask);
+router.get('/', auth, searchTask);
 router.get('/', auth, getAllTasks);
 router.get('/:id', auth, getTaskId);
 router.put('/:id', auth, updateTask);
