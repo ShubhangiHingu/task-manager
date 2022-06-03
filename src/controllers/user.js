@@ -4,7 +4,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require('../models/user')
 const upload = require("../middleware/upload");
-const JWT_SECRET = 'thisismynewcourse';
 
 
 
@@ -29,9 +28,10 @@ const createUser = (async (req, res) => {
         // const token = await user.generateAuthToken()
 
         console.log('User created successfully: ', user)
+    
     } catch (error) {
-        if (error.code === 11000) {
-            // duplicate key
+        if (error.code === 500) {
+
             return res.json({ status: 'error', error: 'name already in use' })
         }
         throw error
@@ -56,7 +56,7 @@ const loginUser = (async (req, res) => {
             {
                 _id: user._id.toString()
             },
-            JWT_SECRET
+            'thisismynewcourse'
         )
 
         return res.json({ status: 'ok', data: { email, password, token } })
@@ -75,9 +75,10 @@ const logoutUser = (async (req, res) => {
         })
         await req.user.save()
 
-        res.send()
+        return res.json({status:'success'})
     } catch (e) {
-        res.status(500).send()
+        return res.status(500).json({success:false});
+
     }
 })
 
@@ -88,9 +89,10 @@ const logoutAllUser = (async (req, res) => {
     try {
         req.user.tokens = []
         await req.user.save()
-        res.send()
+        return res.json({status:'success'})
     } catch (e) {
-        res.status(500).send()
+        return res.status(500).json({success:false});
+
     }
 })
 
@@ -114,10 +116,10 @@ const updateUser = (async (req, res) => {
 
     try {
         updates.forEach((update) => req.user[update] = req.body[update])
-        await req.user.save()
-        res.send(req.user)
+        await req.user.save();
+        res.send(req.user);
     } catch (e) {
-        res.status(400).send(e)
+        return res.status(500).json({success:false});
     }
 })
 
@@ -129,7 +131,7 @@ const deleteUser = (async (req, res) => {
         sendCancelationEmail(req.user.email, req.user.name)
         res.send(req.user)
     } catch (e) {
-        res.status(500).send()
+       return res.status(500).json({success:false});
     }
 })
 
@@ -141,7 +143,7 @@ const deleteUser = (async (req, res) => {
 
 
 const avatarUser = (upload.array('avatar'), (req, res) => {
-    console.log(req.files); // UPLOADED FILE DESCRIPTION RECEIVED
+    console.log(req.files);                                         // UPLOADED FILE DESCRIPTION RECEIVED
     res.send({
         status: "success",
         message: "Files uploaded successfully",
@@ -157,7 +159,7 @@ const avatarUser = (upload.array('avatar'), (req, res) => {
 const deleteAvatar = (async (req, res) => {
     req.user.avatar = undefined
     await req.user.save()
-    res.send()
+        return res.json({status:'success'})
 })
 
 
@@ -174,7 +176,8 @@ const getAvatarId = (async (req, res) => {
         res.set('Content-Type', 'image/png')
         res.send(user.avatar)
     } catch (e) {
-        res.status(404).send()
+       return res.status(500).json({success:false});
+       
     }
 })
 

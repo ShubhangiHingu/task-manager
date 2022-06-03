@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const auth = require('../middleware/auth');
 const Task = require("../models/task");
 
 
@@ -17,10 +16,10 @@ const createTask = (async (req, res) => {
 
     try {
         await task.save()
-        res.status(201).send("Task saved: " + task);
+        return res.status(201).json({ message: "Task saved: ", task })
 
-    } catch (e) {
-        res.status(400).send(e)
+    } catch (error) {
+        return res.status(500).json({ status: false });
     }
 
 })
@@ -56,9 +55,9 @@ const matchTask = (async (req, res) => {
                 sort
             }
         }).execPopulate()
-        res.send(req.user.tasks)
-    } catch (e) {
-        res.status(500).send()
+        return res.send(req.user.tasks)
+    } catch (error) {
+       return res.status(500).json({success:false});
     }
 })
 
@@ -69,14 +68,14 @@ const getAllTasks = (async (req, res) => {
     try {
         await req.user.populate('tasks').execPopulate()
         res.send(req.user.tasks)
-    } catch (e) {
-        res.status(500).send()
+    } catch (error) {
+        return res.status(500).json({success:false});
     }
 })
 
 //find task by id
 
-const getTaskId = (auth, async (req, res) => {
+const getTaskId = (async (req, res) => {
     const _id = req.params.id
 
     try {
@@ -87,8 +86,8 @@ const getTaskId = (auth, async (req, res) => {
         }
 
         res.send(task)
-    } catch (e) {
-        res.status(500).send()
+    } catch (error) {
+       return res.status(500).json({success:false});
     }
 })
 
@@ -100,7 +99,7 @@ const updateTask = (async (req, res) => {
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
-        return res.status(400).send({ error: 'Invalid updates!' })
+        return res.status(400).json({ error: 'Invalid updates!' })
     }
 
     try {
@@ -113,8 +112,9 @@ const updateTask = (async (req, res) => {
         updates.forEach((update) => task[update] = req.body[update])
         await task.save()
         res.send(task)
-    } catch (e) {
-        res.status(400).send(e)
+    } catch (error) {
+       return res.status(500).json({success:false});
+       
     }
 })
 
@@ -122,7 +122,7 @@ const updateTask = (async (req, res) => {
 //delete task
 
 
-const deleteTask = ( async (req, res) => {
+const deleteTask = (async (req, res) => {
     try {
 
         const deletedTask = await Task.findOneAndDelete({
@@ -134,8 +134,8 @@ const deleteTask = ( async (req, res) => {
         }
         res.status(200).send(deletedTask);
     } catch (error) {
-        res.status(400).send();
-        console.log("Error-->", error);
+       return res.status(500).json({success:false,error})
+        // console.log("Error-->", error);
     }
 });
 
