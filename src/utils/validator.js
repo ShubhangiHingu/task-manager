@@ -28,6 +28,25 @@ exports.validateUserSignUp = [
     })
 ];
 
+
+exports.validateTask = [
+  check('description')
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage('Description is required!')
+    .isString()
+    .withMessage('Must be a valid name!')
+    .isLength({ min: 20, max: 50 })
+    .withMessage('Description must be within 20 to 50 character!'),
+  check('completed')
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage('Completed is required!')
+    
+];
+
 //exports errors
 
 exports.userValidation = (req, res, next) => {

@@ -1,23 +1,26 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const auth = require('../middleware/auth');
-const Task = require("../models/task");
+const Task = require("../models/task.models");
 
-//create new task
 
-const createTask = (auth, async (req, res) => {
+// POST REQUEST ---> Creating Task
+
+const createTask = (async (req, res) => {
+
     const task = new Task({
+
         ...req.body,
-        owner: req.user._id
+        owner: req.user._id,
     })
 
     try {
         await task.save()
-        res.status(201).send(task)
+        return res.status(201).json({ message: "Task saved: ", task })
 
-    } catch (e) {
-        res.status(400).send(e) 
+    } catch (error) {
+        res.status(400).json({ message: error.message })
+
     }
 
 })
@@ -30,7 +33,7 @@ const createTask = (auth, async (req, res) => {
 
 //match and sorting task
 
-const matchTask = (auth, async (req, res) => {
+const searchTask = (async (req, res) => {
     const match = {}
     const sort = {}
 
@@ -53,27 +56,29 @@ const matchTask = (auth, async (req, res) => {
                 sort
             }
         }).execPopulate()
-        res.send(req.user.tasks)
-    } catch (e) {
-        res.status(500).send()
+        return res.send(req.user.tasks)
+    } catch (error) {
+        res.status(400).json({ message: error.message })
+
     }
 })
 
 
-// get tasks
+// GET REQUEST ---> READING Tasks
 
-const getAllTasks = (auth, async (req, res) => {
+const getAllTasks = (async (req, res) => {
     try {
         await req.user.populate('tasks').execPopulate()
         res.send(req.user.tasks)
-    } catch (e) {
-        res.status(500).send()
+    } catch (error) {
+        res.status(400).json({ message: error.message })
+
     }
 })
 
-//find task by id
+// GET REQUEST ---> READING TaskById
 
-const getTaskId = (auth, async (req, res) => {
+const getTaskId = (async (req, res) => {
     const _id = req.params.id
 
     try {
@@ -84,20 +89,21 @@ const getTaskId = (auth, async (req, res) => {
         }
 
         res.send(task)
-    } catch (e) {
-        res.status(500).send()
+    } catch (error) {
+        res.status(400).json({ message: error.message })
+
     }
 })
 
-//update task
+// PUT REQUEST ---> UPDATING Task Data
 
-const updateTask = (auth, async (req, res) => {
+const updateTask = (async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['description', 'completed']
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
-        return res.status(400).send({ error: 'Invalid updates!' })
+        return res.status(400).json({ error: 'Invalid updates!' })
     }
 
     try {
@@ -110,34 +116,40 @@ const updateTask = (auth, async (req, res) => {
         updates.forEach((update) => task[update] = req.body[update])
         await task.save()
         res.send(task)
-    } catch (e) {
-        res.status(400).send(e)
+    } catch (error) {
+        res.status(400).json({ message: error.message })
+
+
     }
 })
 
 
-//delete task
+// DELETE REQUEST ---> DELETING Task
 
-const deleteTask = (auth, async (req, res) => {
+
+const deleteTask = (async (req, res) => {
     try {
-        const task = await Task.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
 
-        if (!task) {
-            res.status(404).send()
+        const deletedTask = await Task.findOneAndDelete({
+            _id: req.params.id,
+            owner: req.user._id,
+        });
+        if (!deletedTask) {
+            res.status(404).send("404 Task Not found");
         }
+        res.status(200).send(deletedTask);
+    } catch (error) {
+        res.status(400).json({ message: error.message })
 
-        res.send(task)
-    } catch (e) {
-        res.status(500).send()
+
     }
-})
-
+});
 
 
 
 module.exports = {
     createTask,
-    matchTask,
+    searchTask,
     getAllTasks,
     updateTask,
     deleteTask,

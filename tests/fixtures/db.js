@@ -1,27 +1,27 @@
 const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
-const User = require('../../src/models/user')
-const Task = require('../../src/models/task')
+const User = require('../../src/models/user.model')
+const Task = require('../../src/models/task.models')
 
 const userOneId = new mongoose.Types.ObjectId()
 const userOne = {
     _id: userOneId,
-    name: 'Milkyeei',
-    email: 'mikeeeyi@example.com',
-    password: '56whatttt!!',
+    name: 'Mike',
+    email: 'mike@example.com',
+    password: '56what!!',
     tokens: [{
-        token: jwt.sign({ _id: userOneId }, 'thisismynewcourse')
+        token: jwt.sign({ _id: userOneId }, process.env.JWT_SECRET)
     }]
 }
 
 const userTwoId = new mongoose.Types.ObjectId()
 const userTwo = {
     _id: userTwoId,
-    name: 'Jessiee',
-    email: 'jessiee@example.com',
+    name: 'Jess',
+    email: 'jess@example.com',
     password: 'myhouse099@@',
     tokens: [{
-        token: jwt.sign({ _id: userTwoId }, 'thisismynewcourse')
+        token: jwt.sign({ _id: userTwoId }, process.env.JWT_SECRET)
     }]
 }
 

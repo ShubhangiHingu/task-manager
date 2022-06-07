@@ -1,5 +1,6 @@
 
 const mongoose = require('mongoose')
+const User = require('./user.models')
 
 const taskSchema = new mongoose.Schema({
     description: {
@@ -11,18 +12,16 @@ const taskSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    owner: {
+    owner: {                                             
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'User'
+        ref: 'User',                                            // Defining Relation betwn User Model and Task Model
     }
 }, {
     timestamps: true
 })
 
-
-
-module.exports = mongoose.model('Task', taskSchema)
+module.exports = mongoose.model('Task', taskSchema);            // Defining Task Schema
 
 
 
