@@ -1,5 +1,5 @@
 const express = require("express");
-const router = new express.Router();
+const router = express.Router();
 const auth = require('../middleware/auth.middleware');
 const upload = require('../middleware/upload.middleware');
 const { validateUserSignUp, userValidation } = require('../utils/validator');
@@ -30,7 +30,7 @@ router.delete('/:id/avatar', getAvatarId);
 router.get('/me/avatar', deleteAvatar);
 router.get('/me', auth, getAllUser);
 router.delete('/me', auth, deleteUser);
-router.put('/:id',  updateUser);
+router.put('/:id', updateUser);
 
 
 module.exports = router;

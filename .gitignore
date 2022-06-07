@@ -2,3 +2,4 @@ node_modules
 uploads
 Task App.postman_collection
 token
+.env
